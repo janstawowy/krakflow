@@ -44,29 +44,59 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+  List<Task> tasks = [
+    Task(title: "zrobic zadania z TAM", deadline: "31.03.2026", done: false, priority: "High"),
+    Task(title: "Call z supportem mikromiekkich", deadline: "dzisiaj", done: true, priority: "Medium"),
+    Task(title: "zrobic taski z jiry", deadline: "w tym tygodniu", done: false, priority: "Critical"),
+    Task(title: "Zjesc obiad", deadline: "dzisiaj", done: true, priority: "Low"),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    //category['Subcategories'].where((subcategory) => subcategory.isFeatured)
+    int completed_tasks = tasks.where((task) => task.done).length;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          //mainAxisAlignment: .center,
-          children: [
-            SizedBox(height: 20),
-            const Text('Organizacja studiów'),
-            SizedBox(height: 20),
-            const Text('Dzisiejsze zadania'),
-            SizedBox(height: 20),
-            TaskCard(title: "Projekt Flutter", subtitle: "termin: jutro", icon: Icons.task),
-            TaskCard(title: "Ćwiczenia z matematyki", subtitle: "termin: dzisiaj", icon: Icons.task),
-            TaskCard(title: "Przeczytać o widgetach", subtitle: "termin: w tym tygodniu", icon: Icons.task),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "Masz dzisiaj ${tasks.length} zadania.\nWykonanych: $completed_tasks",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "Dzisiejsze zadania:",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
 
-          ],
-        ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return TaskCard(
+                  title: tasks[index].title,
+                  subtitle: "${tasks[index].deadline} | Priorytet: ${tasks[index].priority}",
+                  icon: tasks[index].done ? Icons.check_circle : Icons.radio_button_unchecked,
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -92,4 +122,16 @@ class TaskCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class Task {
+  final String title;
+  final String deadline;
+  final bool done;
+  final String priority;
+
+  Task({required this.title,
+        required this.deadline,
+        required this.done,
+        required this.priority});
 }
