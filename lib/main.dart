@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'task_repository.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -44,17 +44,17 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
-  List<Task> tasks = [
-    Task(title: "zrobic zadania z TAM", deadline: "31.03.2026", done: false, priority: "High"),
-    Task(title: "Call z supportem mikromiekkich", deadline: "dzisiaj", done: true, priority: "Medium"),
-    Task(title: "zrobic taski z jiry", deadline: "w tym tygodniu", done: false, priority: "Critical"),
-    Task(title: "Zjesc obiad", deadline: "dzisiaj", done: true, priority: "Low"),
-  ];
+  // List<Task> tasks = [
+  //   Task(title: "zrobic zadania z TAM", deadline: "31.03.2026", done: false, priority: "High"),
+  //   Task(title: "Call z supportem mikromiekkich", deadline: "dzisiaj", done: true, priority: "Medium"),
+  //   Task(title: "zrobic taski z jiry", deadline: "w tym tygodniu", done: false, priority: "Critical"),
+  //   Task(title: "Zjesc obiad", deadline: "dzisiaj", done: true, priority: "Low"),
+  // ];
 
   @override
   Widget build(BuildContext context) {
     //category['Subcategories'].where((subcategory) => subcategory.isFeatured)
-    int completed_tasks = tasks.where((task) => task.done).length;
+    int completed_tasks = TaskRepository.tasks.where((task) => task.done).length;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              "Masz dzisiaj ${tasks.length} zadania.\nWykonanych: $completed_tasks",
+              "Masz dzisiaj ${TaskRepository.tasks.length} zadania.\nWykonanych: $completed_tasks",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -86,12 +86,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
           Expanded(
             child: ListView.builder(
-              itemCount: tasks.length,
+              itemCount: TaskRepository.tasks.length,
               itemBuilder: (context, index) {
                 return TaskCard(
-                  title: tasks[index].title,
-                  subtitle: "${tasks[index].deadline} | Priorytet: ${tasks[index].priority}",
-                  icon: tasks[index].done ? Icons.check_circle : Icons.radio_button_unchecked,
+                  title: TaskRepository.tasks[index].title,
+                  subtitle: "${TaskRepository.tasks[index].deadline} | Priorytet: ${TaskRepository.tasks[index].priority}",
+                  icon: TaskRepository.tasks[index].done ? Icons.check_circle : Icons.radio_button_unchecked,
                 );
               },
             ),
@@ -99,13 +99,90 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          final Task? newTask = await
+          Navigator.push(
+            context,
+            //MaterialPageRoute(builder: (context) => AddTaskScreen()),
+            PageRouteBuilder(pageBuilder: (context, animation, secondaryAnimation) => AddTaskScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child,);
+            }
+
+            ),
+          );
+          if (newTask != null){
+            setState(() {
+              TaskRepository.tasks.add(newTask);
+            });
+          }
+        },
         tooltip: 'Dodaj zadanie',
         child: const Icon(Icons.add),
       ),
     );
   }
 }
+
+class AddTaskScreen extends StatelessWidget{
+  AddTaskScreen({super.key});
+
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController deadlineController = TextEditingController();
+  final TextEditingController priorityController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Nowe zadanie"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(
+                labelText: "Wpisz tytul zadania",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            TextField(
+              controller: deadlineController,
+              decoration: InputDecoration(
+                labelText: "Wpisz deadline zadania",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            TextField(
+              controller: priorityController,
+              decoration: InputDecoration(
+                labelText: "Podaj priorytet zadania",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            ElevatedButton(onPressed: () {
+              final newTask = Task(
+                title: titleController.text,
+                deadline: deadlineController.text,
+                priority: priorityController.text,
+                done: false
+              );
+              Navigator.pop(context, newTask);
+            },
+                child: Text("Zapisz"))
+          ],
+        ),
+      ),
+
+    );
+  }
+
+}
+
+
 
 class TaskCard extends StatelessWidget {
   final String title;
@@ -124,14 +201,14 @@ class TaskCard extends StatelessWidget {
   }
 }
 
-class Task {
-  final String title;
-  final String deadline;
-  final bool done;
-  final String priority;
-
-  Task({required this.title,
-        required this.deadline,
-        required this.done,
-        required this.priority});
-}
+// class Task {
+//   final String title;
+//   final String deadline;
+//   final bool done;
+//   final String priority;
+//
+//   Task({required this.title,
+//         required this.deadline,
+//         required this.done,
+//         required this.priority});
+// }
