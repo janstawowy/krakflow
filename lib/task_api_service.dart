@@ -17,8 +17,10 @@ class TaskApiService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final List tasks = data["todos"];
+      int id =0;
       return tasks.map((todo) {
         return Task(
+          id: id++,
           title: todo["todo"],
           deadline: deadlines[random.nextInt(deadlines.length)],
           done: todo["completed"],
